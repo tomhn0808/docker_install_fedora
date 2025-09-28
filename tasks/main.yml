@@ -1,0 +1,68 @@
+---
+# tasks file for docker_install_fedora
+- name: Check if host is Fedora
+  ansible.builtin.fail:
+    msg: "This role only supports Fedora hosts. Detected {{ ansible_facts['distribution'] }}."
+  when: ansible_facts['distribution'] != "Fedora"
+
+- name: Remove old Docker versions
+  ansible.builtin.dnf:
+    name:
+      - docker
+      - docker-client
+      - docker-client-latest
+      - docker-common
+      - docker-latest
+      - docker-latest-logrotate
+      - docker-logrotate
+      - docker-selinux
+      - docker-engine-selinux
+      - docker-engine
+    state: absent
+  register: remove_packages_result
+  changed_when: "remove_packages_result.rc != 0"
+
+- name: Safely remove old Docker data with 'cleanup_docker' tag
+  block:
+    - name: Ensure Docker service is stopped before cleanup
+      ansible.builtin.service:
+        name: docker
+        state: stopped
+      ignore_errors: true
+
+    - name: Remove old Docker data directory
+      ansible.builtin.file:
+        path: /var/lib/docker
+        state: absent
+      register: remove_data_dir
+      changed_when: remove_data_dir.changed
+  tags:
+    - cleanup_docker
+    - never
+
+- name: Setup Repository
+  ansible.builtin.include_tasks: setup-Repository.yml
+
+- name: Install Docker engine
+  ansible.builtin.package:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+    state: present
+    update_cache: true
+
+- name: Start and enable Docker Engine service
+  ansible.builtin.service:
+    name: docker
+    state: started
+    enabled: true
+
+- name: Add users to docker group
+  ansible.builtin.user:
+    name: "{{ item }}"
+    groups: docker
+    append: true
+  loop: "{{ docker_users }}"

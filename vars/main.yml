@@ -1,0 +1,6 @@
+---
+# vars file for docker_install_fedora
+rpm_repository_url: https://download.docker.com/linux/fedora/docker-ce.repo
+rpm_repository_sha256checksum: 1434467cd0e33b0ad10f7008cf6a6643305c003a3e48b1c18fc2cdc7e0357219
+
+docker_fedora_gpg_key_url: "https://download.docker.com/linux/fedora/gpg"
