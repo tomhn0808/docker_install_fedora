@@ -1,0 +1,43 @@
+---
+- name: Create
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Create a Fedora container (41)
+      community.docker.docker_container:
+        name: molecule_fedora41
+        image: fedora:41
+        state: started
+        command: sleep 1d # Keep the container running
+        privileged: true
+        detach: true
+        ports: []
+
+      register: container_result1
+
+    - name: Create a Fedora container (42)
+      community.docker.docker_container:
+        name: molecule_fedora42
+        image: fedora:42
+        state: started
+        command: sleep 1d # Keep the container running
+        privileged: true
+        detach: true
+        ports: []
+      register: container_result2
+
+    - name: Create a Fedora container (latest)
+      community.docker.docker_container:
+        name: molecule_fedora_latest
+        image: fedora:latest
+        state: started
+        command: sleep 1d # Keep the container running
+        privileged: true
+        detach: true
+        ports: []
+      register: container_result3
+
+    - name: Display container ID
+      ansible.builtin.debug:
+        msg: "Container IDs: {{ container_result1.container.Id }}, {{ container_result2.container.Id }}, {{ container_result3.container.Id }}"

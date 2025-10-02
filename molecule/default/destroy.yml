@@ -1,0 +1,15 @@
+---
+- name: Destroy
+  hosts: localhost
+  connection: local
+  vars:
+    container_names:
+      - molecule_fedora41
+      - molecule_fedora42
+      - molecule_fedora_latest
+  tasks:
+    - name: Stop and remove the container
+      community.docker.docker_container:
+        name: "{{ item }}"
+        state: absent
+      loop: "{{ container_names }}"

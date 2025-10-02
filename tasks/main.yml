@@ -59,6 +59,7 @@
     name: docker
     state: started
     enabled: true
+  when: ansible_virtualization_type != "docker" # Don't enable inside Docker (no Systemd in docker)
 
 - name: Add users to docker group
   ansible.builtin.user:

@@ -1,0 +1,51 @@
+---
+# Purpose: assert that the instance really ended up in the expected state.
+# Molecule calls this playbook with `molecule verify`.
+- name: Verify
+  hosts: localhost
+  connection: local
+  vars:
+    container_names:
+      - molecule_fedora41
+      - molecule_fedora42
+      - molecule_fedora_latest
+  tasks:
+    - name: Check if container is running
+      community.docker.docker_container_info:
+        name: "{{ item }}"
+      loop: "{{ container_names }}"
+      register: container_info
+
+    - name: Assert that the container is running
+      ansible.builtin.assert:
+        that:
+          - container_info.results[0].container.State.Running == true
+          - container_info.results[1].container.State.Running == true
+          - container_info.results[2].container.State.Running == true
+        fail_msg: "Container is not running"
+        success_msg: "Container is running"
+
+- name: Verify inside Fedora container
+  hosts: all
+  connection: docker
+  gather_facts: false
+  tasks:
+    - name: Check Docker version
+      ansible.builtin.command: docker --version
+      register: docker_version
+      changed_when: false
+      failed_when: docker_version.rc != 0
+
+    - name: Show Docker version
+      ansible.builtin.debug:
+        var: docker_version.stdout
+
+    - name: Check Docker Compose version
+      ansible.builtin.command: docker compose version
+      register: compose_version
+      changed_when: false
+      failed_when: compose_version.rc != 0
+
+    - name: Show Docker Compose version
+      ansible.builtin.debug:
+        var: compose_version.stdout

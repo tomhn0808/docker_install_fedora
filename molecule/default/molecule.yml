@@ -1,0 +1,73 @@
+---
+# Dependency management (download roles/collections)
+dependency:
+  name: galaxy
+  options:
+    ignore-certs: false
+    ignore-errors: false
+    requirements-file: requirements.yml
+
+driver:
+  name: default
+lint: |
+  yamllint .
+  ansible-lint
+
+provisioner:
+  name: ansible
+  inventory:
+    group_vars:
+      all:
+        ansible_connection: docker
+    config_options:
+      defaults:
+        remote_tmp: /tmp
+platforms:
+  - name: molecule_fedora41
+    image: fedora:41
+    pre_build_image: true
+    privileged: true
+  - name: molecule_fedora42
+    image: fedora:42
+    pre_build_image: true
+    privileged: true
+  - name: molecule_fedora_latest
+    image: fedora:latest
+    pre_build_image: true
+    privileged: true
+
+ansible:
+  cfg:
+    defaults:
+      host_key_checking: false
+      verbosity: 1
+    ssh_connection:
+      pipelining: true
+  env:
+    ANSIBLE_FORCE_COLOR: "1"
+    ANSIBLE_LOAD_CALLBACK_PLUGINS: "1"
+
+  executor:
+    backend: ansible-playbook
+    args:
+      ansible_navigator:
+        - --mode stdout
+        - --pull-policy missing
+        - --execution-environment-image ghcr.io/ansible/community-ansible-dev-tools:latest
+
+  playbooks:
+    create: create.yml
+    prepare: prepare.yml
+    converge: converge.yml
+    destroy: destroy.yml
+    verify: verify.yml
+
+scenario:
+  name: default
+  test_sequence:
+    - dependency
+    - create
+    - prepare
+    - converge
+    - verify
+    - destroy

@@ -1,0 +1,12 @@
+# Purpose: bring the instance to the desired state by running the role under test.
+# Molecule calls this playbook with `molecule converge`.
+---
+- name: Converge
+  hosts: all
+  vars:
+    docker_users:
+      - root
+  tasks:
+    - name: Apply the docker_install_fedora role
+      ansible.builtin.include_role:
+        name: ../../../docker_install_fedora
