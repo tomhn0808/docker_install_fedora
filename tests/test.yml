@@ -1,5 +1,11 @@
 ---
-- hosts: localhost
-  remote_user: root
+- name: Sample usage docker_install_fedora Role
+  hosts: fedoraserv
+  become: true
+  vars:
+    ansible_user: tom
   roles:
-    - docker_install_fedora
+    - role: docker_install_fedora
+      vars:
+        docker_users:
+          - "{{ ansible_user }}"
