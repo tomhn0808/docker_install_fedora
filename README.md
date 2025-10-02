@@ -1,31 +1,59 @@
 Role Name
 =========
 
-A brief description of the role goes here.
+This Ansible role installs and configures Docker Engine on Fedora hosts. It ensures any previous Docker installations and data are safely removed, sets up the official Docker repository, installs the required packages, and manages user group membership for Docker access.
+
 
 Requirements
 ------------
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+- Target host must be running Fedora server (v41 or 42).
+- Ansible 2.9+ recommended.
+
 
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+Variables can be set in `defaults/main.yml`, `vars/main.yml`, or passed as parameters.
+
+- `docker_users`: List of users to be added to the `docker` group.
+
+Example:
+```yaml
+docker_users:
+  - user1
+  - user2
+```
 
 Dependencies
 ------------
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+No external role dependencies.
+
+
+Tags
+----------------
+
+- `cleanup_docker`:  
+  Use this tag to safely remove old Docker data (`/var/lib/docker`).  
+  Example usage:
+  ```sh
+  ansible-playbook playbook.yml --tags cleanup_docker
+  ```
+  By default, this block is skipped unless explicitly tagged.
 
 Example Playbook
 ----------------
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
 
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+```yaml
+- hosts: fedora_hosts
+  roles:
+    - role: docker_install_fedora
+      docker_users:
+        - alice
+        - bob
+```
 
 License
 -------
@@ -35,4 +63,4 @@ BSD
 Author Information
 ------------------
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+Role maintained by tomhn0808
